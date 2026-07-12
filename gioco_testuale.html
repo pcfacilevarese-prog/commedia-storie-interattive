@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generatore di Storie Interattive</title>
+<style>
+:root {
+  --bg-color: #1a1a1a;
+  --container-bg: #262626;
+  --accent-color: #ff9f43;
+  --text-color: #e0e0e0;
+  --border-color: #404040;
+  --user-msg: #2e5138;
+  --ai-msg: #3d3d3d;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.container {
+  width: 100%;
+  max-width: 850px;
+  background-color: var(--container-bg);
+  border: 2px solid var(--accent-color);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+h1 {
+  text-align: center;
+  color: var(--accent-color);
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  border-bottom: 2px dashed var(--accent-color);
+  padding-bottom: 10px;
+}
+
+.setup-section {
+  background-color: #333;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  border: 1px solid var(--border-color);
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--accent-color);
+  font-weight: bold;
+}
+
+input[type="text"], input[type="password"], textarea {
+  width: 100%;
+  padding: 10px;
+  background-color: #1a1a1a;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 14px;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+button {
+  background-color: var(--accent-color);
+  color: #000;
+  border: none;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.2s;
+  text-transform: uppercase;
+}
+
+button:hover {
+  background-color: #ffb366;
+}
+
+.categoria-scelta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.categoria-btn {
+  flex: 1;
+  min-width: 150px;
+  background-color: #1a1a1a;
+  border: 2px solid var(--border-color);
+  color: var(--text-color);
+  padding: 24px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-transform: none;
+  font-size: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.categoria-btn .icona {
+  font-size: 32px;
+}
+
+.categoria-btn:hover, .categoria-btn:focus-visible {
+  border-color: var(--accent-color);
+  background-color: #262626;
+  outline: none;
+}
+
+.categoria-btn.selezionata {
+  border-color: var(--accent-color);
+  background-color: #3a2c1c;
+}
+
+.sub-testo {
+  text-align: center;
+  color: #aaa;
+  font-size: 13px;
+  margin-bottom: 18px;
+}
+
+.chat-area {
+  height: 400px;
+  border: 1px solid var(--border-color);
+  background-color: #111;
+  border-radius: 4px;
+  padding: 15px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.message {
+  padding: 12px 16px;
+  border-radius: 6px;
+  max-width: 85%;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.message.user {
+  background-color: var(--user-msg);
+  align-self: flex-end;
+  border-left: 4px solid #55efc4;
+}
+
+.message.system-ai {
+  background-color: var(--ai-msg);
+  align-self: flex-start;
+  border-left: 4px solid var(--accent-color);
+}
+
+.input-area {
+  display: flex;
+  gap: 10px;
+}
+
+.input-area textarea {
+  height: 60px;
+  resize: none;
+}
+
+.input-area button {
+  width: 120px;
+  height: 60px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.status {
+  font-style: italic;
+  color: #aaa;
+  text-align: center;
+  margin-top: 5px;
+}
+
+.progresso-domande {
+  text-align: center;
+  color: var(--accent-color);
+  font-size: 12px;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Generatore di Storie Interattive</h1>
+
+  <!-- STEP 0: Scelta della categoria -->
+  <div id="categoria-panel" class="setup-section">
+    <div class="sub-testo">Su cosa vuoi basare la tua storia?</div>
+    <div class="categoria-scelta">
+      <button type="button" class="categoria-btn" data-categoria="libro" data-etichetta="Libro">
+        <span class="icona">📖</span>
+        <span>Libro</span>
+      </button>
+      <button type="button" class="categoria-btn" data-categoria="gioco" data-etichetta="Videogioco">
+        <span class="icona">🎮</span>
+        <span>Videogioco</span>
+      </button>
+      <button type="button" class="categoria-btn" data-categoria="film" data-etichetta="Film">
+        <span class="icona">🎬</span>
+        <span>Film</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 1: Configurazione (API key, titolo, riassunto) -->
+  <div id="setup-panel" class="setup-section hidden">
+    <div class="form-group">
+      <label for="api-key">Chiave API:</label>
+      <input type="password" id="api-key" placeholder="Incolla qui la tua API Key...">
+    </div>
+    <div class="form-group">
+      <label for="opera-title" id="label-titolo">Titolo:</label>
+      <input type="text" id="opera-title" placeholder="Es. Il nome dell'opera...">
+    </div>
+    <div class="form-group">
+      <label for="txt-file" id="label-file">Carica il riassunto esteso (.txt):</label>
+      <input type="file" id="txt-file" accept=".txt">
+    </div>
+    <button id="start-btn">Inizia Configurazione Gioco</button>
+    <div id="status-msg" class="status"></div>
+  </div>
+
+  <!-- STEP 2: Gioco -->
+  <div id="game-panel" class="hidden">
+    <div class="progresso-domande" id="progresso-domande"></div>
+    <div class="chat-area" id="chat-box">
+      <div class="message system-ai">Benvenuto! Iniziamo con la creazione del tuo personaggio: l'IA ti farà 10 domande, una alla volta. Rispondi con calma.</div>
+    </div>
+    <div class="input-area">
+      <textarea id="user-input" placeholder="Digita la tua risposta libera qui..."></textarea>
+      <button id="send-btn">Invia</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let apiKey = "";
+let categoriaScelta = "";     // "libro" | "gioco" | "film"
+let etichettaCategoria = "";  // "Libro" | "Videogioco" | "Film"
+let operaTitle = "";
+let operaSummary = "";
+let conversationHistory = [];
+
+const NUMERO_DOMANDE_PERSONAGGIO = 10;
+
+// ---------- STEP 0: Scelta categoria ----------
+document.querySelectorAll(".categoria-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".categoria-btn").forEach((b) => b.classList.remove("selezionata"));
+    btn.classList.add("selezionata");
+    categoriaScelta = btn.dataset.categoria;
+    etichettaCategoria = btn.dataset.etichetta;
+
+    // Aggiorna le etichette dello step successivo in base alla categoria
+    document.getElementById("label-titolo").textContent = `Titolo del ${etichettaCategoria}:`;
+    document.getElementById("opera-title").placeholder = `Es. il titolo del tuo ${etichettaCategoria.toLowerCase()}...`;
+    document.getElementById("label-file").textContent = `Carica la trama/riassunto esteso (.txt):`;
+
+    document.getElementById("categoria-panel").classList.add("hidden");
+    document.getElementById("setup-panel").classList.remove("hidden");
+  });
+});
+
+// Costruisce il prompt di sistema in base alla categoria scelta e al titolo/riassunto forniti.
+// Il tono e il genere (comico, drammatico, avventura, ecc.) vengono dedotti dal riassunto
+// caricato, non sono più fissati a priori: questo motore funziona per qualsiasi genere.
+function costruisciSystemInstruction() {
+  return `Sei un avanzato motore di gioco di ruolo testuale ispirato a un ${categoriaScelta === "libro" ? "libro" : categoriaScelta === "gioco" ? "videogioco" : "film"} intitolato "${operaTitle}".
+
+REGOLE FONDAMENTALI DI GESTIONE:
+1. TONO E GENERE: Deduci il tono, il genere e lo stile narrativo dal riassunto fornito (comico, drammatico, avventuroso, thriller, ecc.) e mantienili coerenti per tutta la partita. Non forzare toni comici se il materiale originale non lo è.
+2. CREAZIONE DEL PERSONAGGIO: All'inizio del gioco fai esattamente ${NUMERO_DOMANDE_PERSONAGGIO} domande, UNA ALLA VOLTA (mai più di una domanda per messaggio), per costruire il personaggio del giocatore (es. nome, ruolo/background, tratto distintivo, motivazione, punto debole, relazioni, obiettivo, ecc. — adatta le domande al tipo di opera scelta). Aspetta sempre la risposta del giocatore prima di fare la domanda successiva.
+3. REGOLA DELL'IMPROVVISAZIONE ASSOLUTA (MAI CONTRADDIRE): Se il giocatore introduce elementi, oggetti, personaggi o dettagli che NON sono presenti nel riassunto fornito, devi ACCETTARLI immediatamente come fatti reali nel mondo di gioco. Non dire mai "questo non c'è nell'opera originale" o "non è possibile". Fai reagire il mondo e i personaggi in modo coerente con il tono della storia.
+4. CONTENUTI: Puoi includere temi maturi in linea con il genere (tensione romantica, un bacio, perdite, conflitti, dramma) ma mai contenuti sessuali espliciti.
+5. STRUTTURA DEI TURNI: Dopo la fase di creazione del personaggio, non proporre mai scelte multiple (A, B, C). Descrivi la scena, le conseguenze dell'azione del giocatore, e lascia il finale aperto per la sua mossa successiva completamente libera.`;
+}
+
+// ---------- STEP 1: Avvio configurazione ----------
+document.getElementById('start-btn').addEventListener('click', async () => {
+  apiKey = document.getElementById('api-key').value.trim();
+  operaTitle = document.getElementById('opera-title').value.trim();
+  const fileInput = document.getElementById('txt-file');
+
+  if (!apiKey || !operaTitle || !fileInput.files[0]) {
+    alert("Per favore, compila tutti i campi e carica il file del riassunto.");
+    return;
+  }
+
+  document.getElementById('status-msg').innerText = "Lettura del file in corso...";
+
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+  reader.onload = async function (e) {
+    operaSummary = e.target.result;
+
+    conversationHistory.push({
+      role: "user",
+      parts: [{ text: `Categoria: ${etichettaCategoria}\nTitolo: ${operaTitle}\n\nRiassunto esteso:\n${operaSummary}\n\nInizia ponendomi la prima delle ${NUMERO_DOMANDE_PERSONAGGIO} domande per creare il mio personaggio.` }]
+    });
+
+    document.getElementById('setup-panel').classList.add('hidden');
+    document.getElementById('game-panel').classList.remove('hidden');
+    aggiornaProgresso(0);
+
+    await callLLMApi();
+  };
+  reader.readAsText(file);
+});
+
+document.getElementById('send-btn').addEventListener('click', sendMessage);
+document.getElementById('user-input').addEventListener('keypress', function (e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+let domandeFatte = 0;
+
+function aggiornaProgresso(n) {
+  const el = document.getElementById("progresso-domande");
+  if (n < NUMERO_DOMANDE_PERSONAGGIO) {
+    el.textContent = `Creazione personaggio — domanda ${n + 1} di ${NUMERO_DOMANDE_PERSONAGGIO}`;
+  } else {
+    el.textContent = "";
+  }
+}
+
+function appendMessage(text, sender) {
+  const chatBox = document.getElementById('chat-box');
+  const msgDiv = document.createElement('div');
+  msgDiv.classList.add('message', sender);
+  msgDiv.textContent = text;
+  chatBox.appendChild(msgDiv);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+async function sendMessage() {
+  const inputEl = document.getElementById('user-input');
+  const text = inputEl.value.trim();
+  if (!text) return;
+
+  appendMessage(text, 'user');
+  inputEl.value = "";
+
+  if (domandeFatte < NUMERO_DOMANDE_PERSONAGGIO) {
+    domandeFatte++;
+    aggiornaProgresso(domandeFatte);
+  }
+
+  conversationHistory.push({
+    role: "user",
+    parts: [{ text: text }]
+  });
+
+  await callLLMApi();
+}
+
+async function callLLMApi() {
+  const chatBox = document.getElementById('chat-box');
+  const loadingDiv = document.createElement('div');
+  loadingDiv.classList.add('message', 'system-ai');
+  loadingDiv.textContent = "...il narratore sta scrivendo la scena...";
+  chatBox.appendChild(loadingDiv);
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  // Endpoint API Google Gemini
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        contents: conversationHistory,
+        systemInstruction: {
+          parts: [{ text: costruisciSystemInstruction() }]
+        },
+        generationConfig: {
+          temperature: 0.8,
+          maxOutputTokens: 800
+        }
+      })
+    });
+
+    chatBox.removeChild(loadingDiv);
+
+    if (!response.ok) {
+      const errData = await response.json();
+      throw new Error(errData.error?.message || "Errore sconosciuto nelle API");
+    }
+
+    const data = await response.json();
+    const aiResponse = data.candidates[0].content.parts[0].text;
+
+    appendMessage(aiResponse, 'system-ai');
+
+    conversationHistory.push({
+      role: "model",
+      parts: [{ text: aiResponse }]
+    });
+
+  } catch (error) {
+    if (chatBox.contains(loadingDiv)) chatBox.removeChild(loadingDiv);
+    appendMessage("Errore di connessione: " + error.message, 'system-ai');
+    console.error(error);
+  }
+}
+</script>
+
+</body>
+</html>
