@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crea la tua avventura gratis | WinCurePro</title>
+<style>
+  :root {
+    --teal-dark: #0F3D3A;
+    --teal: #0F9E96;
+    --teal-light: #4FBDB2;
+    --teal-pale: #E8F3F1;
+    --text: #1a2b2a;
+    --text-muted: #5A6B69;
+    --border: #D8E6E4;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Archivo', 'Trebuchet MS', sans-serif;
+    background: var(--teal-pale);
+    color: var(--text);
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background: var(--teal-dark);
+    color: white;
+    padding: 16px 24px;
+    text-align: center;
+    position: relative;
+  }
+  .torna-home {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: color 0.15s ease;
+  }
+  .torna-home:hover { color: rgba(255,255,255,0.9); }
+  header h1 { margin: 0 0 4px 0; font-size: 22px; letter-spacing: 0.3px; }
+  header p { margin: 0; font-size: 13px; color: var(--teal-light); }
+
+  .main-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 40px 32px;
+    box-shadow: 0 2px 12px rgba(15, 61, 58, 0.08);
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+  }
+  .card h2 {
+    font-size: 19px;
+    color: var(--teal-dark);
+    margin-bottom: 10px;
+  }
+  .card p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  button.btn-login {
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 13px 28px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background: var(--teal-dark);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  button.btn-login:hover { background: var(--teal); }
+  .nota { font-size: 12px; color: var(--text-muted); margin-top: 16px; }
+  .caricamento { font-size: 14px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="torna-home">← Torna al sito</a>
+  <h1>Crea la tua avventura gratis</h1>
+  <p>by WinCurePro — CODEC, il motore narrativo IA</p>
+</header>
+
+<div class="main-area">
+  <div class="card" id="card-contenuto">
+    <div class="caricamento">Verifica accesso in corso...</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function() {
+  const SUPABASE_URL = "https://ouatdwnkteyonoeomcsn.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_AG5gH_fw96x1Eaz6hUm2Pg_gctrkwto";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const cardContenuto = document.getElementById("card-contenuto");
+
+  function mostraLogin() {
+    cardContenuto.innerHTML = `
+      <h2>Prima di iniziare</h2>
+      <p>Accedi con il tuo account Google (gratis, richiede pochi secondi) per creare la tua avventura interattiva.</p>
+      <button class="btn-login" id="btn-login-google">Accedi con Google</button>
+      <div class="nota">Useremo il tuo account solo per salvare il limite di avventure a settimana.</div>
+    `;
+    document.getElementById("btn-login-google").addEventListener("click", async () => {
+      await sb.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: window.location.origin + window.location.pathname }
+      });
+    });
+  }
+
+  function mostraGiaLoggato() {
+    cardContenuto.innerHTML = `<div class="caricamento">Accesso riuscito, ti porto all'avventura...</div>`;
+    window.location.href = "avventura-gioco.html";
+  }
+
+  async function controllaSessione() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      mostraGiaLoggato();
+    } else {
+      mostraLogin();
+    }
+  }
+
+  controllaSessione();
+})();
+</script>
+
+</body>
+</html>
