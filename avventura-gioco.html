@@ -3,12 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="CODEC è il motore narrativo IA più avanzato per storie interattive: trasforma libri, videogiochi e film in avventure testuali su misura, con un personaggio costruito domanda dopo domanda e un mondo che reagisce a ogni tua scelta.">
-<meta name="keywords" content="storie interattive, gioco testuale IA, generatore narrativo, roleplay IA, text adventure, motore narrativo">
-<meta property="og:title" content="CODEC — Il motore narrativo che dà vita a ogni storia">
-<meta property="og:description" content="Un motore alimentato da intelligenza artificiale e guidato da una mente narrativa che adatta ogni scena a te. Libri, videogiochi, film: scegli la sorgente, costruisci il personaggio, entra nella storia.">
+<meta name="description" content="Vivistoria è il motore narrativo IA per storie interattive: trasforma libri, videogiochi e film in avventure testuali su misura, con un personaggio costruito domanda dopo domanda e un mondo che reagisce a ogni tua scelta.">
+<meta name="keywords" content="Vivistoria, storie interattive, gioco testuale IA, generatore narrativo, roleplay IA, text adventure, motore narrativo, avventura interattiva IA">
+<meta property="og:title" content="Vivistoria — Vivi la tua storia, scritta da un'IA">
+<meta property="og:description" content="Un motore narrativo alimentato da intelligenza artificiale che adatta ogni scena a te. Libri, videogiochi, film: scegli la sorgente, costruisci il personaggio, entra nella storia.">
 <meta property="og:type" content="website">
-<title>CODEC // Generatore di Storie Interattive</title>
+<meta property="og:url" content="https://vivistoria.online/">
+<link rel="canonical" href="https://vivistoria.online/avventura-gioco.html">
+<title>Vivistoria — Storie interattive create dall'IA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
@@ -264,6 +266,41 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
   font-size: 13px;
   line-height: 1.6;
 }
+
+.cookie-banner {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  max-width: 620px;
+  margin: 0 auto;
+  background: var(--panel);
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow);
+  color: var(--text);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  z-index: 1000;
+  font-family: 'Share Tech Mono', monospace;
+}
+.cookie-banner p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-dim);
+  flex: 1;
+  min-width: 200px;
+}
+.cookie-banner button {
+  width: auto;
+  padding: 9px 18px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.cookie-banner.hidden { display: none; }
 </style>
 </head>
 <body>
@@ -278,7 +315,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
     <span id="top-bar-categoria">STANDBY</span>
   </div>
 
-  <h1><span class="accent">CODEC</span> — motore narrativo IA</h1>
+  <h1>Vivistoria <span class="accent">// CODEC</span></h1>
   <div class="tagline">La mente che ascolta ogni tua scelta</div>
 
   <!-- STEP VERIFICA -->
@@ -348,6 +385,11 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
     </div>
   </div>
 
+</div>
+
+<div id="cookie-banner" class="cookie-banner hidden">
+  <p>Questo sito usa cookie tecnici necessari per il login (Google/Supabase) e per far funzionare l'applicazione. Non usiamo cookie di profilazione o pubblicitari.</p>
+  <button id="btn-accetta-cookie">Ho capito</button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -568,6 +610,18 @@ REGOLE FONDAMENTALI DI GESTIONE:
     }
   }
 
+  function gestisciBannerCookie() {
+    const banner = document.getElementById("cookie-banner");
+    if (!localStorage.getItem("cookie_consenso_dato")) {
+      banner.classList.remove("hidden");
+    }
+    document.getElementById("btn-accetta-cookie").addEventListener("click", () => {
+      localStorage.setItem("cookie_consenso_dato", "true");
+      banner.classList.add("hidden");
+    });
+  }
+
+  gestisciBannerCookie();
   controllaSessione();
 })();
 </script>
